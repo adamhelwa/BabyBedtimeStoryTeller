@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BabyBedtimeStoryTeller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0C14;
+    --bg-raised: #14151F;
+    --ink: #EDEDF5;
+    --ink-soft: #8C8FA8;
+    --ink-faint: #52546B;
+    --accent: #E3A85E;
+    --accent-dim: #6B4E29;
+    --line: #1E2030;
+    --bad: #E38E8E;
+    --bad-soft: #2A1518;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Karla", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a { color: var(--accent); }
+  button { font-family: inherit; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .app { flex: 1; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; width: 100%; padding: 0 24px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 0; }
+  .brand { display: flex; align-items: center; gap: 8px; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft); }
+  .brand svg { color: var(--accent); flex-shrink: 0; }
+  .gear-btn { background: none; border: 1px solid var(--line); color: var(--ink-faint); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s ease, color 0.2s ease; }
+  .gear-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+  .screen { flex: 1; display: none; flex-direction: column; justify-content: center; padding: 40px 0 60px; }
+  .screen.active { display: flex; }
+
+  /* ---- shared type ---- */
+  h1.h { font-family: "Fraunces", serif; font-weight: 500; font-size: 1.9rem; line-height: 1.18; letter-spacing: -0.01em; margin: 0 0 12px; text-wrap: balance; }
+  p.sub { color: var(--ink-soft); font-size: 0.98rem; line-height: 1.55; margin: 0 0 28px; max-width: 40ch; }
+  label.field-label { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; }
+  input[type="text"], input[type="password"] {
+    width: 100%; background: var(--bg-raised); border: 1px solid var(--line); color: var(--ink);
+    font-size: 1rem; padding: 14px 16px; border-radius: 10px; margin-bottom: 20px; font-family: inherit;
+  }
+  input[type="text"]::placeholder, input[type="password"]::placeholder { color: var(--ink-faint); }
+  input[type="text"]:focus, input[type="password"]:focus { border-color: var(--accent-dim); }
+
+  .btn-primary {
+    width: 100%; background: var(--accent); color: #14151F; border: none; font-weight: 700;
+    font-size: 1rem; padding: 16px 20px; border-radius: 12px; cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 12px 30px -12px rgba(227,168,94,0.45);
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .btn-ghost {
+    width: 100%; background: transparent; color: var(--ink-soft); border: 1px solid var(--line);
+    font-size: 0.92rem; padding: 13px 20px; border-radius: 12px; cursor: pointer; margin-top: 10px;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-ghost:hover { border-color: var(--accent-dim); color: var(--ink); }
+
+  .fine-note { font-size: 0.8rem; color: var(--ink-faint); line-height: 1.5; margin-top: 4px; }
+  .fine-note strong { color: var(--ink-soft); }
+
+  .error-box {
+    display: none; background: var(--bad-soft); border: 1px solid #5A2A2E; color: #F0B9B9;
+    border-radius: 10px; padding: 12px 16px; font-size: 0.88rem; margin-bottom: 18px; line-height: 1.5;
+  }
+  .error-box.show { display: block; }
+
+  /* ---- loading ---- */
+  #screen-loading { align-items: center; text-align: center; }
+  .loading-orb { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(227,168,94,0.28), rgba(227,168,94,0) 70%); position: relative; margin-bottom: 28px; }
+  .loading-orb::after {
+    content: ""; position: absolute; inset: 26px; border-radius: 50%; border: 2px solid var(--accent-dim);
+    border-top-color: var(--accent); animation: spin 1.1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: "Fraunces", serif; font-style: italic; font-size: 1.05rem; color: var(--ink-soft); }
+
+  /* ---- story / bedtime mode ---- */
+  #screen-story { align-items: center; text-align: center; }
+  .story-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 14px; }
+  .story-title { font-family: "Fraunces", serif; font-weight: 500; font-size: 1.7rem; line-height: 1.2; margin: 0 0 34px; text-wrap: balance; }
+
+  .play-stage { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+  .play-glow { position: absolute; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(227,168,94,0.20) 0%, rgba(227,168,94,0) 68%); pointer-events: none; }
+  .play-btn {
+    position: relative; width: 168px; height: 168px; border-radius: 50%;
+    background: linear-gradient(180deg, #181A26, #101119); border: 1px solid var(--accent-dim);
+    color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1px rgba(227,168,94,0.08), 0 20px 60px -20px rgba(227,168,94,0.35);
+    transition: transform 0.25s ease;
+  }
+  .play-btn:hover { transform: scale(1.03); }
+  .play-btn svg { color: var(--accent); }
+
+  .story-status { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-faint); margin-bottom: 30px; min-height: 16px; }
+
+  .story-actions { display: flex; gap: 10px; width: 100%; }
+  .btn-secondary {
+    flex: 1; background: var(--bg-raised); border: 1px solid var(--line); color: var(--ink);
+    font-size: 0.92rem; font-weight: 600; padding: 13px 16px; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: border-color 0.2s ease;
+  }
+  .btn-secondary:hover { border-color: var(--accent-dim); }
+
+  .story-text-toggle { margin-top: 26px; width: 100%; }
+  .story-text-toggle summary { cursor: pointer; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em; list-style: none; }
+  .story-text-toggle summary::-webkit-details-marker { display: none; }
+  .story-text-toggle summary::before { content: "▸ "; }
+  .story-text-toggle[open] summary::before { content: "▾ "; }
+  .story-body-text { text-align: left; font-size: 0.92rem; line-height: 1.7; color: var(--ink-soft); margin-top: 14px; white-space: pre-wrap; }
+
+  /* ---- settings modal ---- */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,6,10,0.72); backdrop-filter: blur(4px); z-index: 50; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--bg-raised); border: 1px solid var(--line); border-radius: 16px; padding: 28px 26px; max-width: 400px; width: 100%; }
+  .modal h2 { font-family: "Fraunces", serif; font-weight: 500; font-size: 1.3rem; margin: 0 0 10px; }
+  .modal p { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.55; margin: 0 0 20px; }
+
+  footer.foot { text-align: center; padding: 18px 0 28px; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; color: var(--ink-faint); }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" fill="currentColor"/></svg>
+      babybedtimestoryteller
+    </div>
+    <button class="gear-btn" id="gear-btn" title="API key settings" aria-label="API key settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    </button>
+  </div>
+
+  <!-- SETUP -->
+  <section class="screen active" id="screen-setup">
+    <h1 class="h">One button between you and lights-out.</h1>
+    <p class="sub">Tell us who tonight's story is for, and a theme — we'll write it and read it aloud.</p>
+
+    <div class="error-box" id="setup-error"></div>
+
+    <label class="field-label" for="child-name">Child's name</label>
+    <input type="text" id="child-name" placeholder="e.g. Maya" maxlength="40" autocomplete="off">
+
+    <label class="field-label" for="theme">Tonight's theme</label>
+    <input type="text" id="theme" placeholder="e.g. a shy dragon who makes a new friend" maxlength="120" autocomplete="off">
+
+    <button class="btn-primary" id="generate-btn" disabled>Tonight's Story</button>
+    <p class="fine-note">Calming, age-appropriate stories for ages 2–5. Every story is checked before it's read aloud.</p>
+  </section>
+
+  <!-- LOADING -->
+  <section class="screen" id="screen-loading">
+    <div class="loading-orb"></div>
+    <p class="loading-text" id="loading-text">Writing tonight's story…</p>
+  </section>
+
+  <!-- STORY / BEDTIME MODE -->
+  <section class="screen" id="screen-story">
+    <p class="story-eyebrow" id="story-eyebrow">TONIGHT'S STORY</p>
+    <h1 class="story-title" id="story-title">&nbsp;</h1>
+
+    <div class="play-stage">
+      <div class="play-glow" aria-hidden="true"></div>
+      <button class="play-btn" id="play-btn" aria-label="Play story">
+        <svg id="play-icon" width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <p class="story-status" id="story-status">Ready to play</p>
+
+    <div class="story-actions">
+      <button class="btn-secondary" id="replay-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Replay
+      </button>
+      <button class="btn-secondary" id="new-story-btn">New story</button>
+    </div>
+
+    <details class="story-text-toggle">
+      <summary>Read the story text</summary>
+      <p class="story-body-text" id="story-body-text"></p>
+    </details>
+
+    <audio id="audio-player" style="display:none;"></audio>
+  </section>
+
+  <footer class="foot">Concept A — Calm &amp; Minimal · MVP demo</footer>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-overlay">
+  <div class="modal">
+    <h2>OpenAI API key</h2>
+    <p>This is a front-end-only demo — there's no server. Your key is stored <strong>only in this browser's local storage</strong> and is sent directly from your device to OpenAI to generate each story and its narration. It is never sent anywhere else, and never leaves your device except to OpenAI.</p>
+    <label class="field-label" for="api-key-input">API key</label>
+    <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off">
+    <div class="error-box" id="settings-error"></div>
+    <button class="btn-primary" id="save-key-btn">Save key</button>
+    <button class="btn-ghost" id="close-settings-btn">Cancel</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "bbst_openai_key";
+  var TEXT_MODEL = "gpt-4o-mini";
+  var TTS_MODEL = "gpt-4o-mini-tts";
+  var TTS_VOICE = "shimmer";
+
+  var FALLBACK_STORIES = [
+    {
+      title: "The Quiet Meadow",
+      body: "Once, in a meadow soft with moss, a little rabbit named Pip felt too wiggly to sleep. A firefly blinked nearby and said, \"Follow my light, slow and low.\" Pip hopped, slower each time, following the gentle glow through tall grass that swayed like a lullaby. One by one, the meadow's little creatures curled up to rest — the mouse in its burrow, the owl on its branch, the fox by the old oak tree. Pip found a bed of clover, soft and cool, and watched the firefly's light grow dim and dimmer, like a candle going out. \"Goodnight, meadow,\" Pip whispered, and closed both eyes, and slept until the sun came up warm and golden."
+    },
+    {
+      title: "The Boat That Rocked to Sleep",
+      body: "A small wooden boat named Wren floated on a lake so still it looked like glass. The stars came out one by one, and the water rocked Wren gently, side to side, like a cradle. \"Where are we going?\" asked Wren. The old lighthouse on the shore blinked slowly and said, \"Nowhere tonight, little boat. Tonight we just rest.\" So Wren stopped paddling and let the water hum its quiet song. The moon laid a silver path across the lake, and one by one the ripples grew smaller, and smaller, until the whole lake was as calm as a held breath. Wren's sail folded down like a blanket, and the little boat drifted into the softest sleep."
+    }
+  ];
+
+  var els = {
+    setupScreen: document.getElementById("screen-setup"),
+    loadingScreen: document.getElementById("screen-loading"),
+    storyScreen: document.getElementById("screen-story"),
+    childName: document.getElementById("child-name"),
+    theme: document.getElementById("theme"),
+    generateBtn: document.getElementById("generate-btn"),
+    setupError: document.getElementById("setup-error"),
+    loadingText: document.getElementById("loading-text"),
+    storyTitle: document.getElementById("story-title"),
+    storyEyebrow: document.getElementById("story-eyebrow"),
+    storyStatus: document.getElementById("story-status"),
+    storyBodyText: document.getElementById("story-body-text"),
+    playBtn: document.getElementById("play-btn"),
+    playIcon: document.getElementById("play-icon"),
+    replayBtn: document.getElementById("replay-btn"),
+    newStoryBtn: document.getElementById("new-story-btn"),
+    audioPlayer: document.getElementById("audio-player"),
+    gearBtn: document.getElementById("gear-btn"),
+    settingsOverlay: document.getElementById("settings-overlay"),
+    apiKeyInput: document.getElementById("api-key-input"),
+    settingsError: document.getElementById("settings-error"),
+    saveKeyBtn: document.getElementById("save-key-btn"),
+    closeSettingsBtn: document.getElementById("close-settings-btn")
+  };
+
+  function showScreen(id) {
+    [els.setupScreen, els.loadingScreen, els.storyScreen].forEach(function (s) {
+      s.classList.toggle("active", s.id === id);
+    });
+  }
+
+  function getKey() { return localStorage.getItem(STORAGE_KEY) || ""; }
+  function setKey(k) { localStorage.setItem(STORAGE_KEY, k); }
+
+  function showError(el, msg) { el.textContent = msg; el.classList.add("show"); }
+  function clearError(el) { el.textContent = ""; el.classList.remove("show"); }
+
+  function openSettings() {
+    els.apiKeyInput.value = getKey();
+    clearError(els.settingsError);
+    els.settingsOverlay.classList.add("show");
+  }
+  function closeSettings() { els.settingsOverlay.classList.remove("show"); }
+
+  els.gearBtn.addEventListener("click", openSettings);
+  els.closeSettingsBtn.addEventListener("click", closeSettings);
+  els.settingsOverlay.addEventListener("click", function (e) {
+    if (e.target === els.settingsOverlay) closeSettings();
+  });
+  els.saveKeyBtn.addEventListener("click", function () {
+    var v = els.apiKeyInput.value.trim();
+    if (!v.startsWith("sk-")) {
+      showError(els.settingsError, "That doesn't look like an OpenAI API key — it should start with \"sk-\".");
+      return;
+    }
+    setKey(v);
+    closeSettings();
+  });
+
+  function updateGenerateEnabled() {
+    els.generateBtn.disabled = !(els.childName.value.trim() && els.theme.value.trim());
+  }
+  els.childName.addEventListener("input", updateGenerateEnabled);
+  els.theme.addEventListener("input", updateGenerateEnabled);
+
+  async function callChat(name, theme, key) {
+    var systemPrompt = "You are a gentle bedtime storyteller for young children ages 2 to 5. " +
+      "Write a short, calming, age-appropriate bedtime story (250 to 350 words). " +
+      "Rules: no violence, no peril, no scary content, no character death, no conflict-heavy plots, " +
+      "simple soothing language, short sentences, and the story must end with the main character " +
+      "falling peacefully asleep. Respond ONLY with a JSON object: {\"title\": string, \"story\": string}. " +
+      "The title should be short and warm, 2 to 6 words.";
+    var userPrompt = "Child's name: " + name + "\nTheme: " + theme;
+
+    var res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({
+        model: TEXT_MODEL,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.9
+      })
+    });
+    if (!res.ok) {
+      var errBody = await res.json().catch(function () { return {}; });
+      throw new ApiError(res.status, errBody.error && errBody.error.message);
+    }
+    var data = await res.json();
+    var parsed = JSON.parse(data.choices[0].message.content);
+    return { title: parsed.title || "Tonight's Story", story: parsed.story };
+  }
+
+  async function checkModeration(text, key) {
+    var res = await fetch("https://api.openai.com/v1/moderations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({ model: "omni-moderation-latest", input: text })
+    });
+    if (!res.ok) return true; // fail-open on the checker itself being unreachable — the model-side prompt is still the primary guard
+    var data = await res.json();
+    return !(data.results && data.results[0] && data.results[0].flagged);
+  }
+
+  async function callTts(text, key) {
+    var res = await fetch("https://api.openai.com/v1/audio/speech", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+      body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: text, speed: 0.95 })
+    });
+    if (!res.ok) {
+      var errBody = await res.json().catch(function () { return {}; });
+      throw new ApiError(res.status, errBody.error && errBody.error.message);
+    }
+    var blob = await res.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  function ApiError(status, message) {
+    this.status = status;
+    this.message = message || "Something went wrong talking to OpenAI.";
+  }
+  ApiError.prototype = Object.create(Error.prototype);
+
+  function friendlyErrorMessage(err) {
+    if (err && err.status === 401) return "That API key was rejected by OpenAI. Check it in settings (gear icon) and try again.";
+    if (err && err.status === 429) return "OpenAI is rate-limiting this key right now. Wait a moment and try again.";
+    if (err instanceof TypeError) return "Couldn't reach OpenAI — check your internet connection and try again.";
+    return (err && err.message) || "Something went wrong. Please try again.";
+  }
+
+  var currentAudioUrl = null;
+
+  async function generateStory() {
+    var key = getKey();
+    if (!key) {
+      openSettings();
+      return;
+    }
+    clearError(els.setupError);
+
+    var name = els.childName.value.trim();
+    var theme = els.theme.value.trim();
+
+    showScreen("screen-loading");
+    els.loadingText.textContent = "Writing " + name + "'s story…";
+
+    try {
+      var attempt = 0;
+      var cleared = false;
+      var title, story;
+
+      while (attempt < 2 && !cleared) {
+        attempt++;
+        var result = await callChat(name, theme, key);
+        title = result.title;
+        story = result.story;
+        els.loadingText.textContent = "Making sure it's just right…";
+        cleared = await checkModeration(story, key);
+      }
+
+      var usedFallback = false;
+      if (!cleared) {
+        var fb = FALLBACK_STORIES[Math.floor(Math.random() * FALLBACK_STORIES.length)];
+        title = fb.title;
+        story = fb.body;
+        usedFallback = true;
+      }
+
+      els.loadingText.textContent = "Finding a soothing voice…";
+      var audioUrl = await callTts(story, key);
+
+      if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+      currentAudioUrl = audioUrl;
+      els.audioPlayer.src = audioUrl;
+
+      els.storyEyebrow.textContent = usedFallback ? "TONIGHT'S STORY · FROM OUR STORY SHELF" : "TONIGHT'S STORY";
+      els.storyTitle.textContent = title;
+      els.storyBodyText.textContent = story;
+      els.storyStatus.textContent = "Ready to play";
+      setPlayIcon(false);
+
+      showScreen("screen-story");
+    } catch (err) {
+      showScreen("screen-setup");
+      showError(els.setupError, friendlyErrorMessage(err));
+    }
+  }
+
+  els.generateBtn.addEventListener("click", generateStory);
+
+  function setPlayIcon(isPlaying) {
+    els.playIcon.innerHTML = isPlaying
+      ? '<rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/>'
+      : '<path d="M8 5v14l11-7Z" fill="currentColor"/>';
+    els.playBtn.setAttribute("aria-label", isPlaying ? "Pause story" : "Play story");
+  }
+
+  els.playBtn.addEventListener("click", function () {
+    if (els.audioPlayer.paused) {
+      els.audioPlayer.play();
+    } else {
+      els.audioPlayer.pause();
+    }
+  });
+  els.audioPlayer.addEventListener("play", function () { setPlayIcon(true); els.storyStatus.textContent = "Playing…"; });
+  els.audioPlayer.addEventListener("pause", function () { setPlayIcon(false); els.storyStatus.textContent = "Paused"; });
+  els.audioPlayer.addEventListener("ended", function () { setPlayIcon(false); els.storyStatus.textContent = "The end. Sweet dreams."; });
+
+  els.replayBtn.addEventListener("click", function () {
+    els.audioPlayer.currentTime = 0;
+    els.audioPlayer.play();
+  });
+
+  els.newStoryBtn.addEventListener("click", function () {
+    els.audioPlayer.pause();
+    els.childName.value = "";
+    els.theme.value = "";
+    updateGenerateEnabled();
+    clearError(els.setupError);
+    showScreen("screen-setup");
+  });
+
+  if (!getKey()) {
+    setTimeout(openSettings, 400);
+  }
+})();
+</script>
+</body>
+</html>
