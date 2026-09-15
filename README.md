@@ -15,6 +15,11 @@ No backend. Calls the OpenAI API directly from the browser:
 Full architecture, data flow, design tradeoffs, and risk management:
 [`docs/architecture.html`](docs/architecture.html) (or the [PDF](docs/architecture.pdf)).
 
+New to the codebase? [`course/index.html`](course/index.html) is a five-module interactive
+course that walks through how this app works — no coding background required. It covers
+the user journey, the three OpenAI calls, the async request sequence, the CORS bug this
+app actually hit (and how it was fixed), and the retry/fallback/error-handling patterns.
+
 ## Running it
 
 Open `index.html` directly, or serve the folder with any static server

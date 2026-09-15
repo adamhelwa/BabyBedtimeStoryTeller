@@ -1,0 +1,115 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The Outside World</h1>
+      <p class="module-subtitle">Three calls to OpenAI — and the one that almost didn't work</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three trips out, every story</h2>
+        <p>Every time someone taps "Tonight's Story," the browser makes three separate <span class="term" data-definition="An API is a menu of requests a piece of software lets other software make to it — like a restaurant menu, but for code asking a service to do something.">API</span> calls, straight to OpenAI's servers:</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/chat/completions</code>
+            <span class="badge-desc">Write the story — called with the Writer's instructions</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/chat/completions</code>
+            <span class="badge-desc">Same address, second time — called with the Safety Reviewer's instructions instead</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/audio/speech</code>
+            <span class="badge-desc">Narrate the cleared text as an audio file</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The doorman checking the guest list</h2>
+        <p>Browsers are protective. Before letting a web page's code fetch data from someone else's server, the browser secretly asks that server first: <em>"is this website actually invited to talk to you?"</em> That question-and-answer is called <span class="term" data-definition="CORS (Cross-Origin Resource Sharing) is a browser security rule. Before letting a web page's code fetch data from a different website's server, the browser checks whether that server explicitly allows it. If the server stays silent, the browser blocks the request — even if the server would have said yes.">CORS</span>.</p>
+        <p>It's exactly like a doorman with a guest list at the entrance of a building. The server has to have written your name down in advance (sent back the right permission headers) — otherwise the doorman turns you away at the door, no matter how legitimate your reason for visiting.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🚪</div>
+          <div class="callout-content">
+            <strong class="callout-title">Not every OpenAI door has a guest list</strong>
+            <p><code>chat/completions</code> and <code>audio/speech</code> both have this app's requests "on the list" — OpenAI's server sends back the right permission headers, so the doorman waves the browser through. <code>/v1/moderations</code> — OpenAI's dedicated safety-check endpoint — sends back no such headers at all. Not "denied." Just silence. And silence means the doorman never lets you in.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What actually happened</h2>
+        <p>The original plan was to use OpenAI's purpose-built <code>/v1/moderations</code> endpoint for the safety check — it's the tool literally designed for this job. It never got a chance to run. Every attempt failed at the doorman, before OpenAI's server even saw the request. Here's the fix, with the reasoning left in as a comment:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment">// The dedicated /v1/moderations endpoint doesn't send CORS headers, so it can't be</span></span>
+<span class="code-line"><span class="code-comment">// called from a browser at all. Chat completions does support CORS, so the safety</span></span>
+<span class="code-line"><span class="code-comment">// gate runs there instead, as a second, independent LLM call acting as a judge.</span></span>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">checkModeration</span>(text, key) {</span>
+<span class="code-line">  <span class="code-keyword">var</span> res = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">"https://api.openai.com/v1/chat/completions"</span>, {</span>
+<span class="code-line">    ...</span>
+<span class="code-line">  });</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A left-behind note explaining why this isn't the "obvious" endpoint...</p>
+              <p class="tl">...because that obvious endpoint silently fails every single time, from a browser.</p>
+              <p class="tl">...so this one uses the endpoint that's actually reachable instead.</p>
+              <p class="tl">Define the safety check as its own function.</p>
+              <p class="tl">And send it to chat/completions — the same door the Writer already used.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>A blocked-by-CORS request and a genuinely dead internet connection look <em>identical</em> to your code — both just throw a generic error with no useful detail. The only way to tell them apart is to open the browser's own error console, which most users never see. That's what made this bug tricky: the app's own error message ("couldn't reach OpenAI") was confidently wrong.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>You're adding a fourth call to a different AI provider's endpoint — straight from this same browser-only app, no backend. You test it and every request instantly fails, with no useful error message at all. What's the very first thing worth checking?</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="Exactly the lesson from this module: an instant, detail-free failure on every single request is the classic signature of a CORS block, not a broken URL or bad key (those usually come back with an actual error message from the server)."
+                 data-explanation-wrong="Consider what kind of failure this is: instant, and with zero detail from the server. A wrong key or bad request usually still gets a response — just an unhappy one. This one never even reaches that point.">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether the API key has a typo</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether that endpoint actually supports being called from a browser at all (CORS)</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether the user's WiFi is working</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

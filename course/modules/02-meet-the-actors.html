@@ -1,0 +1,122 @@
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Actors</h1>
+      <p class="module-subtitle">One performer, three costumes — and a browser that remembers</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A very small cast</h2>
+        <p>Most apps have a big cast: a frontend, a backend, a database, maybe a queue. This app has almost none of that. Here's the whole cast list:</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🖥️</div>
+            <div>
+              <strong>The Browser (the whole app)</strong>
+              <p>Shows the screens, remembers your API key, plays the audio — everything the user sees.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🤖</div>
+            <div>
+              <strong>OpenAI</strong>
+              <p>The only outside service this app ever talks to. It plays three different roles — more on that below.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📖</div>
+            <div>
+              <strong>The Fallback Library</strong>
+              <p>Two pre-written stories, baked right into the code, ready in case something goes wrong.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One actor, three roles</h2>
+        <p>A small theater company will often have one performer play three different characters in the same show — different costume, different voice, same person underneath. That's exactly what OpenAI does in this app.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">✍️</div>
+            <h4 class="pattern-title">The Writer</h4>
+            <p class="pattern-desc">Given a name and a theme, writes a short, calming story.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🛡️</div>
+            <h4 class="pattern-title">The Safety Reviewer</h4>
+            <p class="pattern-desc">Reads the story back and decides: is this actually okay for a 2-to-5-year-old?</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">The Narrator</h4>
+            <p class="pattern-desc">Takes the cleared text and reads it aloud in a calm voice.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>All three roles are the same underlying AI model, just given a different job in each request. The Writer and the Safety Reviewer are quite literally the exact same <span class="term" data-definition="An endpoint is a specific web address a service exposes for one kind of request — like a specific extension you dial at a company, rather than the general front desk.">endpoint</span> called twice, with different instructions each time. You'll see exactly why in Module 4.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where things are remembered</h2>
+        <p>With no server, there's no database anywhere. The only thing this app remembers between visits is one item, kept in the browser itself:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">getKey</span>() { <span class="code-keyword">return</span> localStorage.<span class="code-function">getItem</span>(STORAGE_KEY) || <span class="code-string">""</span>; }</span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">setKey</span>(k) { localStorage.<span class="code-function">setItem</span>(STORAGE_KEY, k); }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">To read the saved key: ask the browser's own storage for it, or hand back an empty string if there isn't one yet.</p>
+              <p class="tl">To save a key: write it into that same storage box.</p>
+            </div>
+          </div>
+        </div>
+
+        <p><span class="term" data-definition="localStorage is a small storage box built into every web browser. Anything saved there stays on that device, in that browser, until it's cleared — it's never automatically sent anywhere.">localStorage</span> is a little storage locker that belongs to your browser, not to any company. That's the whole "database" this app has — and it's the only thing that survives if you close the tab and come back tomorrow.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Right. Since the Writer and the Safety Reviewer are the same endpoint with different instructions, giving that endpoint a third job just means writing a third instruction and sending a third request — no new service to add."
+               data-explanation-wrong="Not quite. Look again at what actually makes the Writer different from the Safety Reviewer in this app — it's not a different piece of software.">
+            <h3 class="quiz-question">You want to add a fourth AI role — a "Title Polisher" that rewrites story titles to be catchier. Given how the Writer and Safety Reviewer are built, what's the simplest way to add it?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Send a third request to the same OpenAI endpoint, with new instructions</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set up a new backend server dedicated to titles</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It isn't possible without switching AI providers</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

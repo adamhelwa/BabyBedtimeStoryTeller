@@ -1,0 +1,148 @@
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">When Things Break</h1>
+      <p class="module-subtitle">A spare tire, a printed photo, and a translator for bad news</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three plans for "what if"</h2>
+        <p>Good code doesn't assume everything works. This app plans for three specific ways things can go wrong — and never lets any of them reach a parent as a scary error screen.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A spare tire in the trunk</h2>
+        <p>What if the Safety Reviewer flags a story twice in a row, and the app runs out of retries? It doesn't show an error. It reaches for a backup — two pre-written, already-safe stories baked right into the code, like keeping a spare tire so a flat doesn't strand you on the road.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">var</span> usedFallback = <span class="code-keyword">false</span>;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!cleared) {</span>
+<span class="code-line">  <span class="code-keyword">var</span> fb = FALLBACK_STORIES[<span class="code-function">Math.floor</span>(<span class="code-function">Math.random</span>() * FALLBACK_STORIES.length)];</span>
+<span class="code-line">  title = fb.title;</span>
+<span class="code-line">  story = fb.body;</span>
+<span class="code-line">  usedFallback = <span class="code-keyword">true</span>;</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start by assuming the backup wasn't needed.</p>
+              <p class="tl">But if nothing ever passed the safety check...</p>
+              <p class="tl">...grab a random one of the two pre-written stories...</p>
+              <p class="tl">...and use its title and text instead of the AI's attempt...</p>
+              <p class="tl">...and remember that this was a backup, for later.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A printed photo, not a re-take</h2>
+        <p>Tap "Replay" and the story plays again instantly — no loading spinner, no new request to OpenAI. That's because the audio isn't re-fetched each time; it's kept, like a printed photo you can look at again without asking the photographer to shoot it twice.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">var</span> blob = <span class="code-keyword">await</span> res.<span class="code-function">blob</span>();</span>
+<span class="code-line"><span class="code-keyword">return</span> URL.<span class="code-function">createObjectURL</span>(blob);</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Take the raw audio data OpenAI sent back...</p>
+              <p class="tl">...and turn it into a local link the browser can replay on its own, anytime, with no network involved.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>That local link, called a <span class="term" data-definition="A blob is raw file data (like audio or an image) held in memory. A blob URL is a temporary local address the browser creates so that data can be played or shown, without it ever having to live on a real website.">blob URL</span>, is what the Replay button actually uses:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">els.replayBtn.<span class="code-function">addEventListener</span>(<span class="code-string">"click"</span>, <span class="code-keyword">function</span> () {</span>
+<span class="code-line">  els.audioPlayer.currentTime = <span class="code-number">0</span>;</span>
+<span class="code-line">  els.audioPlayer.<span class="code-function">play</span>();</span>
+<span class="code-line">});</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">When Replay is tapped: rewind the same audio back to the start...</p>
+              <p class="tl">...and press play again. That's it — no fetching, no waiting.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A translator for bad news</h2>
+        <p>When OpenAI does send back an actual error, the raw message is written for developers, not parents. One function's whole job is translating it:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">friendlyErrorMessage</span>(err) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err &amp;&amp; err.status === <span class="code-number">401</span>) <span class="code-keyword">return</span> <span class="code-string">"That API key was rejected..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err &amp;&amp; err.status === <span class="code-number">429</span>) <span class="code-keyword">return</span> <span class="code-string">"OpenAI is rate-limiting this key..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err <span class="code-keyword">instanceof</span> TypeError) <span class="code-keyword">return</span> <span class="code-string">"Couldn't reach OpenAI..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">return</span> (err &amp;&amp; err.message) || <span class="code-string">"Something went wrong. Please try again."</span>;</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Given whatever went wrong...</p>
+              <p class="tl">...if it was "401" (a bad key), say so in plain words.</p>
+              <p class="tl">...if it was "429" (too many requests, too fast), explain that instead.</p>
+              <p class="tl">...if the network itself failed (which, as Module 4 showed, is also what a CORS block looks like), say that.</p>
+              <p class="tl">Otherwise, fall back to whatever message came with it, or a generic apology as a last resort.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>This pattern — catching a technical error and rewriting it for a human — is called an <span class="term" data-definition="An error status code is a short number a server sends back to say what kind of problem happened. 401 means 'you're not allowed in,' 429 means 'slow down, too many requests.' Every developer eventually memorizes the common ones.">error status code</span> lookup table. It shows up everywhere: the code checks a small number, and translates it into words a non-developer would actually understand.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — a 429 always means the server itself responded, just with 'slow down.' The generic network-style message is reserved for cases where no response ever came back at all, like a CORS block or a dead connection."
+               data-explanation-wrong="Trace it through friendlyErrorMessage: a 429 is checked explicitly, with its own specific message, before the code ever falls through to the generic network-failure line.">
+            <h3 class="quiz-question">A user reports seeing "Couldn't reach OpenAI — check your internet connection" right after generating five stories in quick succession. Based on <code>friendlyErrorMessage</code>, is that message actually accurate here?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes — their WiFi is probably the problem</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Probably not — five rapid requests smells like a rate limit (429), which has its own, different message</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It's impossible to tell without seeing the code</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

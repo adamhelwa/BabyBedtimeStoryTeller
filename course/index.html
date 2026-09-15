@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How BabyBedtimeStoryTeller Works</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #D4A843;
+      --color-accent-hover: #BF9530;
+      --color-accent-light: #FDF5E0;
+      --color-accent-muted: #E0C070;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">How BabyBedtimeStoryTeller Works</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="What This App Does" role="tab" aria-label="Module 1: What This App Does"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="Meet the Actors" role="tab" aria-label="Module 2: Meet the Actors"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="How the Pieces Talk" role="tab" aria-label="Module 3: How the Pieces Talk"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="The Outside World" role="tab" aria-label="Module 4: The Outside World"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="When Things Break" role="tab" aria-label="Module 5: When Things Break"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What This App Does</h1>
+      <p class="module-subtitle">A tired parent, one button, and a brand-new bedtime story every night</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">It's 9:47pm</h2>
+        <p>A parent opens BabyBedtimeStoryTeller, types their kid's name and a theme, and taps one button. Four things happen, in order:</p>
+        <div class="step-cards">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Setup screen</strong>
+              <p>Type a name and a theme. That's the entire input.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Loading screen</strong>
+              <p>A soft spinner while the story gets written, checked, and voiced.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Bedtime screen</strong>
+              <p>A dark, calm screen with one big play button and the finished story.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Replay, any time</strong>
+              <p>Hear it again instantly — no new request, no waiting.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One click, and the app switches scenes</h2>
+        <p>Under the hood, those four screens are just three HTML sections that get shown or hidden. One small <span class="term" data-definition="A function is a named, reusable block of code that does one job. You can 'call' it by name whenever you need that job done again.">function</span> controls all of it.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">showScreen</span>(id) {</span>
+<span class="code-line">    [els.setupScreen, els.loadingScreen, els.storyScreen].<span class="code-function">forEach</span>(<span class="code-keyword">function</span> (s) {</span>
+<span class="code-line">      s.classList.<span class="code-function">toggle</span>(<span class="code-string">"active"</span>, s.id === id);</span>
+<span class="code-line">    });</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Define a reusable job: "show this one screen, hide the rest."</p>
+              <p class="tl">Look at all three screens — setup, loading, and story — one by one...</p>
+              <p class="tl">...and turn the "active" (visible) label on for the one whose ID matches, off for the other two.</p>
+              <p class="tl">End of the check.</p>
+              <p class="tl">That's the whole scene-switcher. Three screens, one rule.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>This is a common trick called a <span class="term" data-definition="A state machine is a system that's always in exactly one of a fixed set of 'states' or modes at a time — like a traffic light being red, yellow, or green, never two at once.">state machine</span>: instead of separate pages, the whole app is one page with three modes, and a single toggle decides which mode is showing.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The whole journey, click to click</h2>
+        <p>Here's everything that happens between the tap and the story playing. Step through it:</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;Parent taps Tonight's Story&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;Browser asks OpenAI to write the story&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;Browser asks OpenAI to safety-check that story&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;Browser asks OpenAI to narrate the cleared story&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;Audio plays. Story screen shows the title and a play button.&quot;}
+        ]">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🌙</div>
+              <span>The App (your browser)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🤖</div>
+              <span>OpenAI</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">▶️</div>
+              <span>Bedtime Screen</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">Click "Next Step" to begin</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">Next Step</button>
+            <button class="btn flow-reset-btn">Restart</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The surprising part: there's no server</h2>
+        <p>Most apps you've used have a company's server sitting in the middle — your phone talks to it, and it talks to everything else. This app skips that step entirely.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚡</div>
+          <div class="callout-content">
+            <strong class="callout-title">No Middleman</strong>
+            <p>Think of it like a phone with no <span class="term" data-definition="Historically, an operator sat between every phone call, manually connecting you to the right line. Most apps have a software equivalent: a backend server that sits between you and any outside service.">operator</span>. Old phones routed every call through a switchboard person. This app dials straight out — your browser calls OpenAI directly, with no company computer answering in between.</p>
+          </div>
+        </div>
+
+        <p>That single design choice is the thread running through this whole course. It's why the <span class="term" data-definition="An API key is a private password-like code that proves to a service like OpenAI who's making a request, so it knows who to bill and whether to allow it.">API key</span> lives in your browser instead of on a server, why three separate requests go out per story, and — in Module 4 — why one of those requests almost didn't work at all.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Exactly. With no server of its own, the app has nowhere else to keep a database — so the browser's own storage is the only place left, and it only ever holds what that one browser needs."
+               data-explanation-wrong="Not quite. Think about what 'no server' actually removes from the picture — there's no company computer left to keep a shared database on.">
+            <h3 class="quiz-question">You want to add a "favorite stories" list that a parent can look back on later. Given that this app has no server, where would that list most naturally have to live?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>In a shared database on OpenAI's servers</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>In that browser's own local storage, on that one device</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It can't be built without adding a backend first</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Actors</h1>
+      <p class="module-subtitle">One performer, three costumes — and a browser that remembers</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A very small cast</h2>
+        <p>Most apps have a big cast: a frontend, a backend, a database, maybe a queue. This app has almost none of that. Here's the whole cast list:</p>
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🖥️</div>
+            <div>
+              <strong>The Browser (the whole app)</strong>
+              <p>Shows the screens, remembers your API key, plays the audio — everything the user sees.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🤖</div>
+            <div>
+              <strong>OpenAI</strong>
+              <p>The only outside service this app ever talks to. It plays three different roles — more on that below.</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📖</div>
+            <div>
+              <strong>The Fallback Library</strong>
+              <p>Two pre-written stories, baked right into the code, ready in case something goes wrong.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">One actor, three roles</h2>
+        <p>A small theater company will often have one performer play three different characters in the same show — different costume, different voice, same person underneath. That's exactly what OpenAI does in this app.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">✍️</div>
+            <h4 class="pattern-title">The Writer</h4>
+            <p class="pattern-desc">Given a name and a theme, writes a short, calming story.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🛡️</div>
+            <h4 class="pattern-title">The Safety Reviewer</h4>
+            <p class="pattern-desc">Reads the story back and decides: is this actually okay for a 2-to-5-year-old?</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🎙️</div>
+            <h4 class="pattern-title">The Narrator</h4>
+            <p class="pattern-desc">Takes the cleared text and reads it aloud in a calm voice.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>All three roles are the same underlying AI model, just given a different job in each request. The Writer and the Safety Reviewer are quite literally the exact same <span class="term" data-definition="An endpoint is a specific web address a service exposes for one kind of request — like a specific extension you dial at a company, rather than the general front desk.">endpoint</span> called twice, with different instructions each time. You'll see exactly why in Module 4.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Where things are remembered</h2>
+        <p>With no server, there's no database anywhere. The only thing this app remembers between visits is one item, kept in the browser itself:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">getKey</span>() { <span class="code-keyword">return</span> localStorage.<span class="code-function">getItem</span>(STORAGE_KEY) || <span class="code-string">""</span>; }</span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">setKey</span>(k) { localStorage.<span class="code-function">setItem</span>(STORAGE_KEY, k); }</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">To read the saved key: ask the browser's own storage for it, or hand back an empty string if there isn't one yet.</p>
+              <p class="tl">To save a key: write it into that same storage box.</p>
+            </div>
+          </div>
+        </div>
+
+        <p><span class="term" data-definition="localStorage is a small storage box built into every web browser. Anything saved there stays on that device, in that browser, until it's cleared — it's never automatically sent anywhere.">localStorage</span> is a little storage locker that belongs to your browser, not to any company. That's the whole "database" this app has — and it's the only thing that survives if you close the tab and come back tomorrow.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module2">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="Right. Since the Writer and the Safety Reviewer are the same endpoint with different instructions, giving that endpoint a third job just means writing a third instruction and sending a third request — no new service to add."
+               data-explanation-wrong="Not quite. Look again at what actually makes the Writer different from the Safety Reviewer in this app — it's not a different piece of software.">
+            <h3 class="quiz-question">You want to add a fourth AI role — a "Title Polisher" that rewrites story titles to be catchier. Given how the Writer and Safety Reviewer are built, what's the simplest way to add it?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Send a third request to the same OpenAI endpoint, with new instructions</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Set up a new backend server dedicated to titles</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It isn't possible without switching AI providers</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">How the Pieces Talk</h1>
+      <p class="module-subtitle">Texting, not voicemail: why each step waits for the last one to answer</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Waiting for the reply bubble</h2>
+        <p>When you text someone, you usually watch for the "..." typing bubble before you send your next message — you don't fire off five texts in a row hoping they land in order. Code can work the same way.</p>
+        <p>In JavaScript, this waiting is called <span class="term" data-definition="Async means a piece of code can pause and let other things happen while it waits for something slow — like a network request — instead of freezing the whole page.">async</span> code, and the word that means "wait right here for the reply" is <span class="term" data-definition="Await pauses a function at that exact line until a promise finishes, then hands back the result — like waiting for the typing bubble to turn into an actual message before reading it.">await</span>.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Watch the conversation happen</h2>
+        <p>Here's the actual back-and-forth between the browser and OpenAI for one story, message by message:</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="browser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🖥️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Browser</span>
+                <p>Write a calm story for Maya, about a shy dragon.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="openai" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">OpenAI (Writer)</span>
+                <p>Here's the title and story, as JSON: {"title": "...", "story": "..."}</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="browser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🖥️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Browser</span>
+                <p>Now review that same story — is it safe for a 2-to-5-year-old?</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="openai" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">OpenAI (Safety Reviewer)</span>
+                <p>{"safe": true}</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="browser" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🖥️</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Browser</span>
+                <p>Cleared. Please narrate this text out loud.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="openai" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🤖</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">OpenAI (Narrator)</span>
+                <p>🔊 [audio file attached]</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">Next Message</button>
+            <button class="btn chat-all-btn">Play All</button>
+            <button class="btn chat-reset-btn">Replay</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+
+        <p>Notice the Browser never sends message 3 (narrate this) until message 2 (the safety check) has actually replied. That's <span class="term" data-definition="A callback is code that runs later, after something finishes — like leaving your number so a store can call you back when your order's ready, instead of standing at the counter waiting.">await</span> in action: each line pauses until the reply arrives.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The same conversation, as code</h2>
+        <p>This is the real loop that runs that conversation. It tries up to twice to get a story that passes the safety check:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">while</span> (attempt &lt; <span class="code-number">2</span> &amp;&amp; !cleared) {</span>
+<span class="code-line">  attempt++;</span>
+<span class="code-line">  <span class="code-keyword">var</span> result = <span class="code-keyword">await</span> <span class="code-function">callChat</span>(name, theme, key);</span>
+<span class="code-line">  title = result.title;</span>
+<span class="code-line">  story = result.story;</span>
+<span class="code-line">  cleared = <span class="code-keyword">await</span> <span class="code-function">checkModeration</span>(story, key);</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Keep trying — but stop after 2 attempts, or as soon as a story passes.</p>
+              <p class="tl">Count this attempt.</p>
+              <p class="tl">Ask the Writer for a story, and wait right here until it replies.</p>
+              <p class="tl">Save the title it sent back...</p>
+              <p class="tl">...and the story text it sent back.</p>
+              <p class="tl">Ask the Safety Reviewer about that story, and wait for its verdict before looping again.</p>
+              <p class="tl">If it wasn't cleared, and there's an attempt left, go around again.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>Without <span class="term" data-definition="A Promise is JavaScript's placeholder for a value that isn't ready yet — like a claim ticket at a coat check. You can hold onto it, and later trade it in for the real thing once it's ready.">await</span>, this code would fire off the safety check before the story even finished being written — like reading a book's review before the author has typed the last page.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module3">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="Exactly — cleared stays false, attempt is now 2, and the while condition (attempt < 2) fails, so the loop simply stops. Nothing crashes; the code just moves on to whatever runs after the loop."
+               data-explanation-wrong="Not quite — trace the two variables the while condition checks (attempt and cleared) through a second failed pass, and see what value each one holds right after.">
+            <h3 class="quiz-question">Say the Safety Reviewer flags the story as unsafe on both attempts. What happens to this while loop on the second failure?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It keeps looping forever, retrying endlessly</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The app crashes with an error</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The loop simply exits, with cleared still false</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The Outside World</h1>
+      <p class="module-subtitle">Three calls to OpenAI — and the one that almost didn't work</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three trips out, every story</h2>
+        <p>Every time someone taps "Tonight's Story," the browser makes three separate <span class="term" data-definition="An API is a menu of requests a piece of software lets other software make to it — like a restaurant menu, but for code asking a service to do something.">API</span> calls, straight to OpenAI's servers:</p>
+        <div class="badge-list">
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/chat/completions</code>
+            <span class="badge-desc">Write the story — called with the Writer's instructions</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/chat/completions</code>
+            <span class="badge-desc">Same address, second time — called with the Safety Reviewer's instructions instead</span>
+          </div>
+          <div class="badge-item">
+            <code class="badge-code">POST /v1/audio/speech</code>
+            <span class="badge-desc">Narrate the cleared text as an audio file</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The doorman checking the guest list</h2>
+        <p>Browsers are protective. Before letting a web page's code fetch data from someone else's server, the browser secretly asks that server first: <em>"is this website actually invited to talk to you?"</em> That question-and-answer is called <span class="term" data-definition="CORS (Cross-Origin Resource Sharing) is a browser security rule. Before letting a web page's code fetch data from a different website's server, the browser checks whether that server explicitly allows it. If the server stays silent, the browser blocks the request — even if the server would have said yes.">CORS</span>.</p>
+        <p>It's exactly like a doorman with a guest list at the entrance of a building. The server has to have written your name down in advance (sent back the right permission headers) — otherwise the doorman turns you away at the door, no matter how legitimate your reason for visiting.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🚪</div>
+          <div class="callout-content">
+            <strong class="callout-title">Not every OpenAI door has a guest list</strong>
+            <p><code>chat/completions</code> and <code>audio/speech</code> both have this app's requests "on the list" — OpenAI's server sends back the right permission headers, so the doorman waves the browser through. <code>/v1/moderations</code> — OpenAI's dedicated safety-check endpoint — sends back no such headers at all. Not "denied." Just silence. And silence means the doorman never lets you in.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What actually happened</h2>
+        <p>The original plan was to use OpenAI's purpose-built <code>/v1/moderations</code> endpoint for the safety check — it's the tool literally designed for this job. It never got a chance to run. Every attempt failed at the doorman, before OpenAI's server even saw the request. Here's the fix, with the reasoning left in as a comment:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-comment">// The dedicated /v1/moderations endpoint doesn't send CORS headers, so it can't be</span></span>
+<span class="code-line"><span class="code-comment">// called from a browser at all. Chat completions does support CORS, so the safety</span></span>
+<span class="code-line"><span class="code-comment">// gate runs there instead, as a second, independent LLM call acting as a judge.</span></span>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">checkModeration</span>(text, key) {</span>
+<span class="code-line">  <span class="code-keyword">var</span> res = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">"https://api.openai.com/v1/chat/completions"</span>, {</span>
+<span class="code-line">    ...</span>
+<span class="code-line">  });</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">A left-behind note explaining why this isn't the "obvious" endpoint...</p>
+              <p class="tl">...because that obvious endpoint silently fails every single time, from a browser.</p>
+              <p class="tl">...so this one uses the endpoint that's actually reachable instead.</p>
+              <p class="tl">Define the safety check as its own function.</p>
+              <p class="tl">And send it to chat/completions — the same door the Writer already used.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>A blocked-by-CORS request and a genuinely dead internet connection look <em>identical</em> to your code — both just throw a generic error with no useful detail. The only way to tell them apart is to open the browser's own error console, which most users never see. That's what made this bug tricky: the app's own error message ("couldn't reach OpenAI") was confidently wrong.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module4">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario</span>
+              <p>You're adding a fourth call to a different AI provider's endpoint — straight from this same browser-only app, no backend. You test it and every request instantly fails, with no useful error message at all. What's the very first thing worth checking?</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="Exactly the lesson from this module: an instant, detail-free failure on every single request is the classic signature of a CORS block, not a broken URL or bad key (those usually come back with an actual error message from the server)."
+                 data-explanation-wrong="Consider what kind of failure this is: instant, and with zero detail from the server. A wrong key or bad request usually still gets a response — just an unhappy one. This one never even reaches that point.">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether the API key has a typo</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether that endpoint actually supports being called from a browser at all (CORS)</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Whether the user's WiFi is working</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">When Things Break</h1>
+      <p class="module-subtitle">A spare tire, a printed photo, and a translator for bad news</p>
+    </header>
+
+    <div class="module-body">
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Three plans for "what if"</h2>
+        <p>Good code doesn't assume everything works. This app plans for three specific ways things can go wrong — and never lets any of them reach a parent as a scary error screen.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A spare tire in the trunk</h2>
+        <p>What if the Safety Reviewer flags a story twice in a row, and the app runs out of retries? It doesn't show an error. It reaches for a backup — two pre-written, already-safe stories baked right into the code, like keeping a spare tire so a flat doesn't strand you on the road.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">var</span> usedFallback = <span class="code-keyword">false</span>;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!cleared) {</span>
+<span class="code-line">  <span class="code-keyword">var</span> fb = FALLBACK_STORIES[<span class="code-function">Math.floor</span>(<span class="code-function">Math.random</span>() * FALLBACK_STORIES.length)];</span>
+<span class="code-line">  title = fb.title;</span>
+<span class="code-line">  story = fb.body;</span>
+<span class="code-line">  usedFallback = <span class="code-keyword">true</span>;</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Start by assuming the backup wasn't needed.</p>
+              <p class="tl">But if nothing ever passed the safety check...</p>
+              <p class="tl">...grab a random one of the two pre-written stories...</p>
+              <p class="tl">...and use its title and text instead of the AI's attempt...</p>
+              <p class="tl">...and remember that this was a backup, for later.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A printed photo, not a re-take</h2>
+        <p>Tap "Replay" and the story plays again instantly — no loading spinner, no new request to OpenAI. That's because the audio isn't re-fetched each time; it's kept, like a printed photo you can look at again without asking the photographer to shoot it twice.</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">var</span> blob = <span class="code-keyword">await</span> res.<span class="code-function">blob</span>();</span>
+<span class="code-line"><span class="code-keyword">return</span> URL.<span class="code-function">createObjectURL</span>(blob);</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Take the raw audio data OpenAI sent back...</p>
+              <p class="tl">...and turn it into a local link the browser can replay on its own, anytime, with no network involved.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>That local link, called a <span class="term" data-definition="A blob is raw file data (like audio or an image) held in memory. A blob URL is a temporary local address the browser creates so that data can be played or shown, without it ever having to live on a real website.">blob URL</span>, is what the Replay button actually uses:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line">els.replayBtn.<span class="code-function">addEventListener</span>(<span class="code-string">"click"</span>, <span class="code-keyword">function</span> () {</span>
+<span class="code-line">  els.audioPlayer.currentTime = <span class="code-number">0</span>;</span>
+<span class="code-line">  els.audioPlayer.<span class="code-function">play</span>();</span>
+<span class="code-line">});</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">When Replay is tapped: rewind the same audio back to the start...</p>
+              <p class="tl">...and press play again. That's it — no fetching, no waiting.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A translator for bad news</h2>
+        <p>When OpenAI does send back an actual error, the raw message is written for developers, not parents. One function's whole job is translating it:</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-line"><span class="code-keyword">function</span> <span class="code-function">friendlyErrorMessage</span>(err) {</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err &amp;&amp; err.status === <span class="code-number">401</span>) <span class="code-keyword">return</span> <span class="code-string">"That API key was rejected..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err &amp;&amp; err.status === <span class="code-number">429</span>) <span class="code-keyword">return</span> <span class="code-string">"OpenAI is rate-limiting this key..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">if</span> (err <span class="code-keyword">instanceof</span> TypeError) <span class="code-keyword">return</span> <span class="code-string">"Couldn't reach OpenAI..."</span>;</span>
+<span class="code-line">  <span class="code-keyword">return</span> (err &amp;&amp; err.message) || <span class="code-string">"Something went wrong. Please try again."</span>;</span>
+<span class="code-line">}</span></code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Given whatever went wrong...</p>
+              <p class="tl">...if it was "401" (a bad key), say so in plain words.</p>
+              <p class="tl">...if it was "429" (too many requests, too fast), explain that instead.</p>
+              <p class="tl">...if the network itself failed (which, as Module 4 showed, is also what a CORS block looks like), say that.</p>
+              <p class="tl">Otherwise, fall back to whatever message came with it, or a generic apology as a last resort.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>This pattern — catching a technical error and rewriting it for a human — is called an <span class="term" data-definition="An error status code is a short number a server sends back to say what kind of problem happened. 401 means 'you're not allowed in,' 429 means 'slow down, too many requests.' Every developer eventually memorizes the common ones.">error status code</span> lookup table. It shows up everywhere: the code checks a small number, and translates it into words a non-developer would actually understand.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <div class="quiz-container" id="quiz-module5">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="Right — a 429 always means the server itself responded, just with 'slow down.' The generic network-style message is reserved for cases where no response ever came back at all, like a CORS block or a dead connection."
+               data-explanation-wrong="Trace it through friendlyErrorMessage: a 429 is checked explicitly, with its own specific message, before the code ever falls through to the generic network-failure line.">
+            <h3 class="quiz-question">A user reports seeing "Couldn't reach OpenAI — check your internet connection" right after generating five stories in quick succession. Based on <code>friendlyErrorMessage</code>, is that message actually accurate here?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes — their WiFi is probably the problem</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Probably not — five rapid requests smells like a rate limit (429), which has its own, different message</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>It's impossible to tell without seeing the code</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">Check Answer</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>
