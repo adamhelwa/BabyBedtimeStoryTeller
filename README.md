@@ -6,9 +6,14 @@ age-appropriate bedtime story generated and narrated aloud — with a replay but
 No backend. Calls the OpenAI API directly from the browser:
 
 - `chat/completions` (gpt-4o-mini, JSON mode) — writes the story
-- `moderations` (omni-moderation-latest) — checks it before narration; falls back to a
-  curated pre-written story if it's ever flagged
+- `chat/completions` again, as a safety judge — checks it before narration, retries up to
+  twice, and falls back to a curated pre-written story if it's still flagged. (The dedicated
+  `/v1/moderations` endpoint doesn't send CORS headers, so it can't be called from a
+  browser at all — see [`docs/architecture.html`](docs/architecture.html) for why.)
 - `audio/speech` (gpt-4o-mini-tts) — narrates it
+
+Full architecture, data flow, design tradeoffs, and risk management:
+[`docs/architecture.html`](docs/architecture.html) (or the [PDF](docs/architecture.pdf)).
 
 ## Running it
 

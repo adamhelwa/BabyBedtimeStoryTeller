@@ -1,0 +1,343 @@
+<title>BabyBedtimeStoryTeller MVP Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f5f5fa; --surface: #ecedf7; --surface-raised: #ffffff;
+    --ink: #1c1e2e; --ink-soft: #565973; --ink-faint: #8688a3;
+    --accent: #4b4e9c; --accent-soft: #e4e4f5; --accent-ink: #33356e;
+    --glow: #b97a2e; --glow-soft: #f4e6d2;
+    --bad: #b1453f; --bad-soft: #f6e2df;
+    --good: #3f7a5c; --good-soft: #e0f0e7;
+    --line: #d8d9ec; --line-strong: #b9bbdc;
+    --shadow: 0 1px 2px rgba(28,30,46,0.06), 0 8px 24px -12px rgba(28,30,46,0.12);
+    --serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
+    --sans: "Karla", -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14151f; --surface: #1c1e2c; --surface-raised: #232537;
+      --ink: #e9e9f5; --ink-soft: #a3a5c4; --ink-faint: #6f7194;
+      --accent: #9b9ef0; --accent-soft: #262a45; --accent-ink: #cdcff8;
+      --glow: #e3ad63; --glow-soft: #332a1c;
+      --bad: #e2867e; --bad-soft: #341d1b;
+      --good: #7fc9a3; --good-soft: #17301f;
+      --line: #2c2e42; --line-strong: #3d3f5c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14151f; --surface: #1c1e2c; --surface-raised: #232537;
+    --ink: #e9e9f5; --ink-soft: #a3a5c4; --ink-faint: #6f7194;
+    --accent: #9b9ef0; --accent-soft: #262a45; --accent-ink: #cdcff8;
+    --glow: #e3ad63; --glow-soft: #332a1c;
+    --bad: #e2867e; --bad-soft: #341d1b;
+    --good: #7fc9a3; --good-soft: #17301f;
+    --line: #2c2e42; --line-strong: #3d3f5c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 220px minmax(0, 800px); gap: 56px; padding: 56px 32px 120px; }
+  .shell > * { min-width: 0; }
+
+  nav.toc { position: sticky; top: 40px; align-self: start; height: fit-content; }
+  .toc-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
+  .toc a { display: block; padding: 6px 0 6px 16px; margin-left: -1px; border-left: 1px solid transparent; color: var(--ink-soft); text-decoration: none; font-size: 13px; }
+  .toc a:hover { color: var(--ink); }
+  .toc a .num { font-family: var(--mono); color: var(--ink-faint); margin-right: 8px; }
+
+  header.cover { margin-bottom: 52px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--glow); margin: 0 0 16px; }
+  h1.title { font-family: var(--serif); font-weight: 600; font-size: clamp(1.9rem, 3vw + 1rem, 2.6rem); line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 14px; text-wrap: balance; }
+  p.dek { font-size: 1.08rem; color: var(--ink-soft); max-width: 60ch; margin: 0; }
+
+  section { margin-bottom: 64px; scroll-margin-top: 32px; }
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; }
+  .section-num { font-family: var(--mono); font-size: 13px; color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 2px 7px; }
+  h2 { font-family: var(--serif); font-weight: 600; font-size: 1.45rem; margin: 0; text-wrap: balance; }
+  p { max-width: 72ch; }
+  section > p:first-of-type { color: var(--ink-soft); }
+
+  figure.diagram { margin: 20px 0 8px; padding: 22px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+  figure.diagram svg { width: 100%; height: auto; display: block; color: var(--ink-soft); }
+  figure.diagram .accent-el { color: var(--glow); }
+  figure.diagram .bad-el { color: var(--bad); }
+  figure.diagram .good-el { color: var(--good); }
+  figcaption { font-size: 0.85rem; color: var(--ink-faint); margin-top: 14px; text-align: center; }
+
+  /* tradeoff / risk cards */
+  .card-list { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .tcard { border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; background: var(--surface-raised); }
+  .tcard .t-decision { font-family: "Fraunces", serif; font-weight: 600; font-size: 1.05rem; margin: 0 0 10px; color: var(--ink); }
+  .tcard .t-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; font-size: 0.9rem; padding: 5px 0; }
+  .tcard .t-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 2px; }
+  .tcard .t-label.gain { color: var(--good); }
+  .tcard .t-label.cost { color: var(--bad); }
+  .tcard .t-val { color: var(--ink-soft); }
+
+  .risk-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.88rem; }
+  .risk-table th { text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; padding: 0 12px 10px 0; border-bottom: 1px solid var(--line-strong); }
+  .risk-table td { padding: 13px 12px 13px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-soft); }
+  .risk-table td.name { color: var(--ink); font-weight: 600; }
+  .risk-pill { display: inline-block; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+  .risk-pill.open { background: var(--bad-soft); color: var(--bad); }
+  .risk-pill.mitigated { background: var(--good-soft); color: var(--good); }
+  .table-scroll { overflow-x: auto; }
+
+  .insight { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .insight:first-child { border-top: none; }
+  .insight .i-num { font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; padding-top: 3px; }
+  .insight h3 { font-family: var(--sans); font-weight: 700; font-size: 0.98rem; margin: 0 0 6px; }
+  .insight p { margin: 0; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.55; }
+
+  footer.doc-footer { border-top: 1px solid var(--line); padding-top: 24px; margin-top: 40px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; padding: 32px 20px 80px; gap: 32px; }
+    nav.toc { position: static; }
+    nav.toc ol { columns: 2; column-gap: 24px; border-left: none; }
+    nav.toc a { border-left: 1px solid var(--line); }
+    .tcard .t-row { grid-template-columns: 70px 1fr; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="toc" aria-label="Table of contents">
+    <p class="toc-label">On this page</p>
+    <ol>
+      <li><a href="#flow"><span class="num">01</span>Architecture &amp; data flow</a></li>
+      <li><a href="#lifecycle"><span class="num">02</span>Request lifecycle</a></li>
+      <li><a href="#tradeoffs"><span class="num">03</span>Design tradeoffs</a></li>
+      <li><a href="#insights"><span class="num">04</span>Technical insights</a></li>
+      <li><a href="#risks"><span class="num">05</span>Risk management</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="cover">
+      <p class="eyebrow">As-Built · MVP</p>
+      <h1 class="title">What actually shipped</h1>
+      <p class="dek">One static HTML page, no backend, no database — the browser talks to OpenAI directly. Simpler than the planned architecture in every way except one: it moved every risk the backend was going to absorb onto the browser instead.</p>
+    </header>
+
+    <!-- 01 FLOW -->
+    <section id="flow">
+      <div class="section-head"><span class="section-num">01</span><h2>Architecture &amp; data flow</h2></div>
+      <p>Two components, no server in between. GitHub Pages hands the browser a static file once; after that, every request goes straight from the browser to OpenAI.</p>
+
+      <figure class="diagram">
+        <svg viewBox="0 0 720 380" role="img" aria-label="GitHub Pages serves a static index.html to the browser once. The browser, holding the API key in local storage, makes three direct calls to OpenAI: chat completions to write the story, chat completions again as a safety judge with a retry and local fallback library, and audio speech for narration. No backend or database exists between them.">
+          <rect x="16" y="120" width="130" height="60" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="81" y="145" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" font-weight="700" fill="currentColor">GitHub Pages</text>
+          <text x="81" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">static host</text>
+
+          <rect x="230" y="70" width="260" height="180" rx="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text x="248" y="92" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="0.06em" fill="currentColor">BROWSER — THE WHOLE APP</text>
+
+          <rect x="250" y="106" width="220" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="360" y="127" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor">Setup UI (name, theme)</text>
+
+          <rect x="250" y="150" width="220" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="360" y="171" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor">localStorage — API key</text>
+
+          <rect x="250" y="194" width="220" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="360" y="215" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor">2 fallback stories (bundled JS)</text>
+
+          <line x1="146" y1="150" x2="230" y2="150" stroke="currentColor" stroke-width="1.5" marker-end="url(#m1)"/>
+          <text x="188" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor">loads once</text>
+
+          <rect x="560" y="20" width="150" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="2" class="accent-el"/>
+          <text x="635" y="46" text-anchor="middle" font-family="Karla, sans-serif" font-size="12.5" font-weight="700" fill="currentColor" class="accent-el">api.openai.com</text>
+
+          <line x1="490" y1="123" x2="560" y2="45" stroke="currentColor" stroke-width="1.5" class="accent-el" marker-end="url(#m2)"/>
+          <text x="500" y="88" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">1 · chat/completions</text>
+          <text x="500" y="100" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">write the story</text>
+
+          <line x1="490" y1="167" x2="560" y2="55" stroke="currentColor" stroke-width="1.5" class="accent-el" marker-end="url(#m2)"/>
+          <text x="500" y="185" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">2 · chat/completions</text>
+          <text x="500" y="197" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">safety judge, retry ×2</text>
+
+          <line x1="490" y1="211" x2="560" y2="60" stroke="currentColor" stroke-width="1.5" class="accent-el" marker-end="url(#m2)"/>
+          <text x="500" y="230" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">3 · audio/speech</text>
+          <text x="500" y="242" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="accent-el">narrate the cleared text</text>
+
+          <rect x="230" y="290" width="260" height="42" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" class="bad-el" stroke-dasharray="4 3"/>
+          <text x="360" y="308" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor" class="bad-el">/v1/moderations</text>
+          <text x="360" y="321" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="bad-el">planned, but blocked — no CORS</text>
+          <line x1="360" y1="250" x2="360" y2="290" stroke="currentColor" stroke-width="1.5" class="bad-el" stroke-dasharray="3 3"/>
+
+          <text x="16" y="220" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">NOT PRESENT:</text>
+          <text x="16" y="236" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">backend server</text>
+          <text x="16" y="250" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">database</text>
+          <text x="16" y="264" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor">observability</text>
+
+          <defs>
+            <marker id="m1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker>
+            <marker id="m2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" class="accent-el"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker>
+          </defs>
+        </svg>
+        <figcaption>Everything inside the dashed boundary runs in the visitor's own browser. The planned dedicated moderation endpoint (bottom, red) turned out to be unreachable — see §4.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 02 LIFECYCLE -->
+    <section id="lifecycle">
+      <div class="section-head"><span class="section-num">02</span><h2>Request lifecycle</h2></div>
+      <p>One "Tonight's Story" click, three sequential API calls, one possible fork.</p>
+
+      <figure class="diagram">
+        <svg viewBox="0 0 640 440" role="img" aria-label="Sequence: submit, generate story text, run the safety judge with up to two retries, fall back to a bundled story if still unsafe, then narrate and play the cleared text. The safety judge step is highlighted as the decision point.">
+          <rect x="40" y="8" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="170" y="30" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" fill="currentColor">Click "Tonight's Story"</text>
+
+          <line x1="170" y1="42" x2="170" y2="66" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+          <rect x="40" y="70" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="170" y="92" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" fill="currentColor">chat/completions writes the story</text>
+
+          <line x1="170" y1="104" x2="170" y2="134" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+          <rect x="40" y="138" width="260" height="42" rx="7" fill="none" stroke="currentColor" stroke-width="2.5" class="accent-el"/>
+          <text x="170" y="158" text-anchor="middle" font-family="Karla, sans-serif" font-size="12.5" font-weight="700" fill="currentColor" class="accent-el">Safety judge call</text>
+          <text x="170" y="173" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" class="accent-el">chat/completions, temperature 0</text>
+
+          <line x1="300" y1="159" x2="340" y2="159" stroke="currentColor" stroke-width="1.5" class="bad-el" stroke-dasharray="4 3"/>
+          <rect x="340" y="142" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5" class="bad-el" stroke-dasharray="4 3"/>
+          <text x="470" y="163" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor" class="bad-el">unsafe → retry (max 2 attempts)</text>
+
+          <line x1="170" y1="180" x2="170" y2="204" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+          <text x="185" y="196" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">safe</text>
+          <rect x="40" y="208" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="170" y="230" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" fill="currentColor">audio/speech narrates the text</text>
+
+          <line x1="170" y1="242" x2="170" y2="266" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+          <rect x="40" y="270" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="170" y="292" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" fill="currentColor">Blob URL created, audio plays</text>
+
+          <line x1="170" y1="304" x2="170" y2="328" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+          <rect x="40" y="332" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="170" y="354" text-anchor="middle" font-family="Karla, sans-serif" font-size="12" fill="currentColor">Replay re-plays the same blob</text>
+          <text x="170" y="366" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor">no new network call</text>
+
+          <line x1="470" y1="159" x2="470" y2="200" stroke="currentColor" stroke-width="1.5" class="bad-el" stroke-dasharray="3 3"/>
+          <text x="486" y="185" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="bad-el">still</text>
+          <text x="486" y="197" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="bad-el">unsafe</text>
+          <rect x="340" y="204" width="260" height="34" rx="7" fill="none" stroke="currentColor" stroke-width="1.5" class="bad-el"/>
+          <text x="470" y="226" text-anchor="middle" font-family="Karla, sans-serif" font-size="11.5" fill="currentColor" class="bad-el">Use bundled fallback story</text>
+          <line x1="470" y1="238" x2="300" y2="290" stroke="currentColor" stroke-width="1.5" class="bad-el" marker-end="url(#m4)"/>
+          <text x="420" y="270" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" class="bad-el">still narrated + played</text>
+
+          <defs>
+            <marker id="m3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker>
+            <marker id="m4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" class="bad-el"><polygon points="0,0 8,4 0,8" fill="currentColor"/></marker>
+          </defs>
+        </svg>
+        <figcaption>The safety judge (accent) is the one decision point in the flow — a fail there never surfaces an error to the parent, it silently swaps in a pre-written story instead.</figcaption>
+      </figure>
+    </section>
+
+    <!-- 03 TRADEOFFS -->
+    <section id="tradeoffs">
+      <div class="section-head"><span class="section-num">03</span><h2>Design tradeoffs</h2></div>
+      <p>Every simplification below was made to satisfy one constraint: ship a working, deployable demo with no server to operate.</p>
+      <div class="card-list">
+        <div class="tcard">
+          <p class="t-decision">No backend at all</p>
+          <div class="t-row"><span class="t-label gain">Gained</span><span class="t-val">Zero hosting cost, zero ops, deploys as a single static file, works the moment GitHub Pages serves it.</span></div>
+          <div class="t-row"><span class="t-label cost">Cost</span><span class="t-val">No place to hide a shared API key, enforce quotas, log generations, or persist anything beyond one browser's local storage.</span></div>
+        </div>
+        <div class="tcard">
+          <p class="t-decision">API key entered by the visitor, stored in localStorage</p>
+          <div class="t-row"><span class="t-label gain">Gained</span><span class="t-val">Never committed to the public repo; each visitor uses their own billing, not ours.</span></div>
+          <div class="t-row"><span class="t-label cost">Cost</span><span class="t-val">Sits in plaintext in devtools on that device. Fine for a single-user personal tool; wrong model for anything multi-tenant.</span></div>
+        </div>
+        <div class="tcard">
+          <p class="t-decision">LLM-as-judge instead of the dedicated moderation endpoint</p>
+          <div class="t-row"><span class="t-label gain">Gained</span><span class="t-val">A real, working safety gate that actually runs in a browser — the planned endpoint doesn't support CORS at all.</span></div>
+          <div class="t-row"><span class="t-label cost">Cost</span><span class="t-val">A general-purpose model prompted to judge is less rigorously calibrated than OpenAI's purpose-trained classifier, and it's a second paid call instead of a typically-free one.</span></div>
+        </div>
+        <div class="tcard">
+          <p class="t-decision">No streaming — full story, then full audio</p>
+          <div class="t-row"><span class="t-label gain">Gained</span><span class="t-val">Far simpler client code; nothing partially plays before the safety gate has cleared it.</span></div>
+          <div class="t-row"><span class="t-label cost">Cost</span><span class="t-val">Slower perceived start than the "time to first audio" target in the original architecture plan — this MVP waits for everything before playing anything.</span></div>
+        </div>
+        <div class="tcard">
+          <p class="t-decision">No persistence beyond the API key</p>
+          <div class="t-row"><span class="t-label gain">Gained</span><span class="t-val">Nothing to design, migrate, or secure — nothing personal about the child is ever stored anywhere.</span></div>
+          <div class="t-row"><span class="t-label cost">Cost</span><span class="t-val">The PRD's "evolves over time" — recurring characters, rating-driven personalization — doesn't exist yet. Every story starts from zero.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 INSIGHTS -->
+    <section id="insights">
+      <div class="section-head"><span class="section-num">04</span><h2>Technical insights</h2></div>
+      <div class="insight">
+        <span class="i-num">01</span>
+        <div><h3>Not every OpenAI endpoint is browser-reachable</h3><p><code>chat/completions</code> and <code>audio/speech</code> both send permissive CORS headers and work fine from a web page. <code>/v1/moderations</code> sends none — the browser blocks the preflight outright, and the failure looks exactly like a dead network connection, not a rejected request. This is the single fact that determined the safety architecture.</p></div>
+      </div>
+      <div class="insight">
+        <span class="i-num">02</span>
+        <div><h3>A CORS failure and a network failure are indistinguishable to JS</h3><p>Both surface as a generic <code>TypeError: Failed to fetch</code>. The only way to tell them apart is the browser console, which the user obviously never sees — the app's own "couldn't reach OpenAI" message was accurate-sounding but wrong. Diagnosing this needed the actual console output, not just the error text.</p></div>
+      </div>
+      <div class="insight">
+        <span class="i-num">03</span>
+        <div><h3>GitHub Pages' "built" status isn't "live everywhere"</h3><p>The build API reported success within a minute, but different CDN edge nodes kept serving the previous version for several minutes after — with <code>age: 0</code> response headers that made it look like a fresh fetch of stale content. Verifying a deploy means comparing file hashes, not trusting a status field.</p></div>
+      </div>
+    </section>
+
+    <!-- 05 RISKS -->
+    <section id="risks">
+      <div class="section-head"><span class="section-num">05</span><h2>Risk management</h2></div>
+      <div class="table-scroll">
+        <table class="risk-table">
+          <thead><tr><th>Risk</th><th>Handling</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="name">Unsafe content reaches narration</td>
+              <td>System-prompt steering + LLM safety judge + 2 retries + bundled fallback story as last resort.</td>
+              <td><span class="risk-pill mitigated">mitigated</span></td>
+            </tr>
+            <tr>
+              <td class="name">Safety judge itself is wrong or unreachable</td>
+              <td>Fails open on a request error (story still plays) so a network hiccup can't strand the parent — but this means an unreachable judge is silently skipped, not silently blocked.</td>
+              <td><span class="risk-pill open">open</span></td>
+            </tr>
+            <tr>
+              <td class="name">API key exposure</td>
+              <td>Never committed to source; lives only in the visitor's own localStorage, sent only to OpenAI. Right model for one user, wrong model for many.</td>
+              <td><span class="risk-pill mitigated">mitigated</span></td>
+            </tr>
+            <tr>
+              <td class="name">Runaway API spend</td>
+              <td>None built in — no client-side rate limit or generation cap. Relies entirely on the spend limits the user sets on their own OpenAI account.</td>
+              <td><span class="risk-pill open">open</span></td>
+            </tr>
+            <tr>
+              <td class="name">Single point of failure on OpenAI</td>
+              <td>All three calls hit one provider; no fallback provider, no server-side abstraction to swap one in.</td>
+              <td><span class="risk-pill open">open</span></td>
+            </tr>
+            <tr>
+              <td class="name">No audit trail for flagged content</td>
+              <td>Nothing is logged anywhere — good for privacy, bad for reviewing near-misses after the fact. Accepted tradeoff for a personal demo.</td>
+              <td><span class="risk-pill open">open</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="doc-footer">
+      <span>BabyBedtimeStoryTeller · MVP architecture, as deployed</span>
+      <span>github.com/adamhelwa/BabyBedtimeStoryTeller</span>
+    </footer>
+  </main>
+</div>
